@@ -6,10 +6,10 @@ const anthropic = new Anthropic({
 
 const LISTENER_PROMPT = `You are the Listener, the first agent in Innerlight.
 Your only job is to read what the person wrote and choose the right sharpening question.
-Respond with a JSON object only. No other text. No markdown.
+Respond with a JSON object only. No other text. No markdown. No backticks.
 If this is the first user message, set ready_to_narrate to false and include a question.
-If this is the second user message, set ready_to_narrate to true.
-Format: {"move":"LAND","tone":"difficult","question":"your question here","ready_to_narrate":false}`
+If this is the second user message or more, set ready_to_narrate to true.
+Format exactly: {"move":"LAND","tone":"difficult","question":"your question here","ready_to_narrate":false}`
 
 const NARRATOR_PROMPT = `You are the Narrator, the voice of Innerlight.
 You receive a conversation and write the piece. You do not ask questions. You only write.
@@ -74,9 +74,7 @@ const listen = async (messages) => {
 
     const text = response.content[0].text.trim()
     console.log("Listener:", text)
-    const clean = text.replace(/^```json\s*/m, '').replace(/^```\s*/m, '').replace(/```$/m, '').trim()
-    const parsed = JSON.parse(clean)
-    return parsed
+    return JSON.parse(text)
   } catch (e) {
     console.log("Listener fallback:", e.message)
     return {
@@ -114,7 +112,6 @@ export async function POST(request) {
         if (!listenerResult.ready_to_narrate) {
           send({ type: 'text', content: listenerResult.question })
           send({ type: 'done' })
-          controller.close()
           return
         }
 
