@@ -8,6 +8,7 @@ export default function Home() {
   const [messages, setMessages] = useState<{role: string, content: string}[]>([])
   const [streaming, setStreaming] = useState(false)
   const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
@@ -66,6 +67,7 @@ export default function Home() {
                 })
               }
               if (parsed.type === 'video') setVideoUrl(parsed.url)
+              if (parsed.type === 'image') setImageUrl(parsed.url)
             } catch {}
           }
         }
@@ -247,6 +249,20 @@ export default function Home() {
                 }}>
                   —
                 </p>
+              )}
+
+              {imageUrl && (
+                <img
+                  src={imageUrl}
+                  alt=""
+                  style={{
+                    width: '100%',
+                    marginTop: '2rem',
+                    marginBottom: '2rem',
+                    opacity: 0.9,
+                    borderRadius: '4px'
+                  }}
+                />
               )}
 
               <div ref={bottomRef} />
