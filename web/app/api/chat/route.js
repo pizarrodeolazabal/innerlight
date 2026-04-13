@@ -16,16 +16,64 @@ If this is the first user message, set ready_to_narrate to false and include a q
 If this is the second user message or more, set ready_to_narrate to true.
 Output only raw JSON like this: {"move":"LAND","tone":"difficult","question":"your question here","ready_to_narrate":false}`
 
-const NARRATOR_PROMPT = `You are the Narrator, the voice of Innerlight.
-You receive a conversation and write the piece. You do not ask questions. You only write.
-The closest reference for your voice is The School of Life: philosophical, warm, precise.
-Four paragraphs maximum. No titles. No lists. Pure prose.
-Paragraph 1: Open in third person. Name the human experience broadly.
-Paragraph 2: A real finding or universal truth that normalizes what they feel.
-Paragraph 3: Move from people to you. Use their specific details transformed.
-Paragraph 4: One to three sentences. Arrives and stops.
-Never gives advice. Never offers resolution.
-Never uses: journey, healing, growth, closure, beautiful, heart.`
+const NARRATOR_PROMPT = `You are the Narrator of Innerlight.
+
+Your job is to receive what someone is living today and respond with a piece written in the first person voice of a historical or composed figure who lived something analogous.
+
+THE VOICE — choose one of three types:
+1. REAL HISTORICAL FIGURE — someone with a verifiable name, era, and context. Construct first person strictly from what that person documented or lived publicly. Never invent facts.
+2. COMPOSED FIGURE — anonymous but situated in a real time and place. "A weaver in 15th century Flanders." "An Irish accountant in London, 1891." Credibility comes from historical detail, not from a name.
+3. CONTEMPORARY RECOGNIZED FIGURE — when the profile clearly calls for it. Constructed from documented public record only.
+
+HOW TO CHOOSE THE VOICE:
+— Read the emotional core of what the user shared
+— Choose a figure from a different culture or era than what the user seems to be from
+— The surprise of the pairing is part of the value — a Korean monk, a Senegalese merchant, a Venetian glassblower
+— The figure must have lived something emotionally analogous — not the same situation, the same tension
+
+THE PIECE — STRUCTURE:
+No fixed template. Follows a constant narrative logic: situate, reveal, connect.
+
+OPENING — situate the figure:
+Establish who speaks, in what era, in what world. The historical or cultural detail is what makes it feel real. 2-3 sentences maximum.
+
+DEVELOPMENT — first person narrative:
+The voice narrates what they lived, without dramatizing, without resolving. The reader gradually recognizes their own experience in another's. Use historical or statistical context only when it reinforces emotionally — never as cold data. 3-4 sentences.
+
+CLOSING — actionable resolution:
+Every piece ends with something that gives the user somewhere to go. Detect which type applies:
+- Concrete or situational topics → direct recommendation from within the voice's experience
+- Emotional or relational topics → open question or recognition that moves internally
+Never resolve from outside. The recommendation always comes from the voice.
+
+SIGNATURE:
+End the piece with: — [Name or description], [place], [era]
+Example: — Johann, anonymous blacksmith, banks of the Rhine, Germany, 17th century
+
+THE VOICE — always:
+— Speaks in first person
+— Situates the figure in their world with historical precision
+— Connects their experience to what the user lives today, without naming the user directly
+— Ends with actionable resolution calibrated to the topic type
+— Adapts in weight and tone to what the user shared
+
+THE VOICE — never:
+— Advises from outside — the recommendation always comes from within the voice
+— Judges
+— Resolves from outside — opens perspective, does not close problems
+— Dramatizes excessively
+— Uses self-help language — nothing like heal, let go, vibrate
+— Invents historical facts
+— Addresses mental health, addiction or crisis topics — redirect warmly instead
+
+IMAGE PROMPT:
+After the signature, on a new line, write exactly this block — it will not be shown to the user:
+[IMAGE: close-up portrait / medium shot / wide establishing shot of [describe the figure precisely] in [specific place and era]. Photorealistic, shot as if with a modern high-resolution camera transported to the period. Ultra-sharp focus, natural [type of light specific to the setting]. [palette based on the world of the figure]. The environment is richly detailed — [2-3 specific details of the setting]. The person looks present, absorbed, not posing. No artificial aging, no film grain, no vintage filter. Cinematic but documentary in feel. No text, no watermarks.]
+
+The IMAGE block must always appear after the signature. Replace all bracketed placeholders with specific descriptions. It is not part of the text the user reads.
+
+THE MEASURE:
+The user reads it and thinks: "I did not expect this voice — and yet it is exactly what I needed to hear."`
 
 const PAUSE_MESSAGE = `Today you brought a lot. That means there are important things moving inside you. Innerlight can help you see — but what you are carrying also deserves a real conversation, with someone who knows you and can stay. Is there someone you could have coffee with this week?`
 
@@ -33,42 +81,34 @@ const archetypes = [
   {
     name: "The Unseen Effort",
     keywords: ["unseen", "ignored", "invisible"],
-    videoId: "16502841",
-    imagePrompt: "35mm film photograph. A person stands with their back to the camera, slightly out of focus, facing a wide window that looks out onto an empty street. The figure is the emotional center of the frame. The glass is slightly fogged. Muted palette: cold whites, pale grays, faded blue. Shallow depth of field. Cinematic grain."
+    videoId: "16502841"
   },
   {
     name: "The Cost of Caring",
     keywords: ["guilty", "not enough", "failing"],
-    videoId: "19436637",
-    imagePrompt: "35mm film photograph. A person sits with their back to the camera, slightly out of focus, facing a faintly glowing screen in a dim room. Warm and cold light pulling in opposite directions. Muted palette: dusty amber, cool blue-gray, deep shadow. Shallow depth of field. Cinematic grain."
+    videoId: "19436637"
   },
   {
     name: "The Borrowed Identity",
     keywords: ["impostor", "promoted", "achieved"],
-    videoId: "34576517",
-    imagePrompt: "35mm film photograph. A person stands with their back to the camera, slightly out of focus, in the middle of a long corridor stretching into dim light. Muted palette: faded whites, worn grays, dull ochre. Flat even light. Shallow depth of field. Cinematic grain."
+    videoId: "34576517"
   },
   {
     name: "The Necessary Ending",
     keywords: ["ended", "left", "broke up", "quit"],
-    videoId: "5930874",
-    imagePrompt: "35mm film photograph. A person stands with their back to the camera, very close to a rain-covered window. Rain drops run down the glass, sharp and clear. Outside is blurred and soft. Muted palette: cool silver, pale gray, faint warm glow. Shallow depth of field. Cinematic grain."
+    videoId: "5930874"
   },
   {
     name: "The New Silence",
     keywords: ["alone", "moved", "lonely"],
-    videoId: "35872077",
-    imagePrompt: "35mm film photograph. A person sits on the floor with their back to the camera, in a bare and impersonal room. One warm object nearby. Outside the window, life continues out of focus. Muted palette with one note of warmth against gray. Shallow depth of field. Cinematic grain."
+    videoId: "35872077"
   },
   {
     name: "The Wasted Hours",
     keywords: ["wasting time", "stuck", "trapped"],
-    videoId: "7944930",
-    imagePrompt: "35mm film photograph. A person sits at a table with their back to the camera, staring at a dark phone screen. Signs of time passed around them. Muted palette: cold gray, dull white, faint amber. Shallow depth of field. Cinematic grain."
+    videoId: "7944930"
   }
 ]
-
-const defaultImagePrompt = "35mm film photograph. A person stands with their back to the camera, slightly out of focus, looking out a window at soft natural light. Muted palette, shallow depth of field. Quiet. Still. Cinematic grain."
 
 const findArchetype = (text) => {
   const lower = text.toLowerCase()
@@ -98,6 +138,15 @@ const getVideoUrl = async (videoId) => {
   } catch {
     return null
   }
+}
+
+const extractImagePrompt = (text) => {
+  const match = text.match(/\[IMAGE:([\s\S]*?)\]/)
+  return match ? match[1].trim() : null
+}
+
+const cleanText = (text) => {
+  return text.replace(/\[IMAGE:[\s\S]*?\]/, '').trim()
 }
 
 const generateImage = async (imagePrompt) => {
@@ -175,9 +224,6 @@ export async function POST(request) {
           return
         }
 
-        const imagePrompt = archetype ? archetype.imagePrompt : defaultImagePrompt
-        const imagePromise = generateImage(imagePrompt)
-
         const narratorStream = anthropic.messages.stream({
           model: 'claude-sonnet-4-5',
           max_tokens: 1024,
@@ -190,12 +236,19 @@ export async function POST(request) {
         for await (const chunk of narratorStream) {
           if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
             fullResponse += chunk.delta.text
-            send({ type: 'text', content: chunk.delta.text })
           }
         }
 
-        const imageUrl = await imagePromise
-        if (imageUrl) send({ type: 'image', url: imageUrl })
+        const imagePrompt = extractImagePrompt(fullResponse)
+        const visibleText = cleanText(fullResponse)
+
+        send({ type: 'text', content: visibleText })
+
+        if (imagePrompt) {
+          const imagePromise = generateImage(imagePrompt)
+          const imageUrl = await imagePromise
+          if (imageUrl) send({ type: 'image', url: imageUrl })
+        }
 
         if (fullResponse.includes('INNERLIGHT_PAUSE')) {
           send({ type: 'pause', content: PAUSE_MESSAGE })
