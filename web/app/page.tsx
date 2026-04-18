@@ -7,7 +7,6 @@ export default function Home() {
   const [phase, setPhase] = useState('input')
   const [messages, setMessages] = useState<{role: string, content: string}[]>([])
   const [streaming, setStreaming] = useState(false)
-  const [videoUrl, setVideoUrl] = useState<string | null>(null)
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -18,7 +17,7 @@ export default function Home() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, imageUrl])
 
   if (!mounted) return null
 
@@ -66,7 +65,6 @@ export default function Home() {
                   return updated
                 })
               }
-              if (parsed.type === 'video') setVideoUrl(parsed.url)
               if (parsed.type === 'image') setImageUrl(parsed.url)
             } catch {}
           }
@@ -100,23 +98,40 @@ export default function Home() {
       overflow: 'hidden'
     }}>
 
-      {videoUrl && (
-        <video
-          src={videoUrl}
-          autoPlay
-          loop
-          muted
-          playsInline
-          style={{
-            position: 'fixed',
-            top: 0, left: 0,
-            width: '100%', height: '100%',
-            objectFit: 'cover',
-            opacity: 0.15,
-            zIndex: 0
-          }}
-        />
-      )}
+      <div style={{
+        position: 'fixed',
+        top: 0, left: 0,
+        width: '100%', height: '100%',
+        zIndex: 0,
+        backgroundImage: `
+          repeating-linear-gradient(
+            90deg,
+            transparent,
+            transparent 2px,
+            rgba(255,255,255,0.012) 2px,
+            rgba(255,255,255,0.012) 4px
+          ),
+          repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 3px,
+            rgba(255,255,255,0.008) 3px,
+            rgba(255,255,255,0.008) 6px
+          )
+        `,
+        backgroundSize: '4px 6px'
+      }} />
+
+      <div style={{
+        position: 'fixed',
+        top: 0, left: 0,
+        width: '100%', height: '100%',
+        zIndex: 0,
+        backgroundImage: `
+          radial-gradient(ellipse at 20% 50%, rgba(61, 90, 128, 0.04) 0%, transparent 60%),
+          radial-gradient(ellipse at 80% 50%, rgba(61, 90, 128, 0.03) 0%, transparent 60%)
+        `
+      }} />
 
       <div style={{
         position: 'relative',
@@ -233,7 +248,8 @@ export default function Home() {
                       color: '#e8e4dc',
                       lineHeight: '1.9',
                       margin: '0',
-                      fontWeight: '400'
+                      fontWeight: '400',
+                      whiteSpace: 'pre-wrap'
                     }}>
                       {msg.content}
                     </p>
@@ -257,10 +273,11 @@ export default function Home() {
                   alt=""
                   style={{
                     width: '100%',
-                    marginTop: '2rem',
+                    marginTop: '3rem',
                     marginBottom: '2rem',
-                    opacity: 0.9,
-                    borderRadius: '4px'
+                    opacity: 0.95,
+                    borderRadius: '2px',
+                    display: 'block'
                   }}
                 />
               )}
